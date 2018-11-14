@@ -5,6 +5,8 @@ var bodyparser = require('body-parser');
 // Import my models
 require('./models/user')
 require('./models/drink')
+require('./models/category')
+
 
 // Import my models
 mongoose.connect('mongodb://localhost/beer', function (err) {
@@ -24,4 +26,3 @@ var router = require('./routes');
 
 app.use('/api', router);
 app.listen(3000);
-

@@ -5,6 +5,7 @@ var router = express.Router();
 
 var user = mongoose.model('user');
 var drink = mongoose.model('drink');
+var category = mongoose.model('category');
 
 router.route('/user')
     .get(function (req, res) {
@@ -82,4 +83,18 @@ router.route('/user')
         });
 
     });
+
+    router.route('/category')
+    .get(function (req, res) {   
+        category.find(function (err, resultado) {
+            if (err) {
+                res.status(500).json({ mensaje: 'Failed GET category' });
+            }
+            else {
+                res.status(200).json(resultado);
+            }
+        });
+        
+    });
+    
 module.exports = router;

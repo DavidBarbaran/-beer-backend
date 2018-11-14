@@ -9,4 +9,4 @@ var drinkSchema = mongoose.Schema({
     offer: Number,
     price: Number
 });
-var drink = mongoose.model('drink', drinkSchema);
+mongoose.model('drink', drinkSchema);
