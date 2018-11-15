@@ -7,7 +7,6 @@ require('./models/user')
 require('./models/drink')
 require('./models/category')
 
-
 // Import my models
 mongoose.connect('mongodb://localhost/beer', function (err) {
     if (err) {

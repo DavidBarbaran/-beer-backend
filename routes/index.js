@@ -7,8 +7,7 @@ var user = mongoose.model('user');
 var drink = mongoose.model('drink');
 var category = mongoose.model('category');
 
-router.route('/user')
-    .get(function (req, res) {
+router.route('/user').get(function (req, res) {
 
         // User.findOne({ nameFirst: 'John' });     // returns first user named John
         //  res.send('user' + id);    
@@ -21,8 +20,8 @@ router.route('/user')
                 res.status(200).json(resultado);
             }
         });
-        
-    })
+        }
+        )
     .post(function (req, res) {
         var myUser = new user();
         myUser.name = req.body.name;
@@ -46,12 +45,10 @@ router.route('/user')
 
     });
 
-    router.route('/drink/:category')
+    router.route('/drink')
     .get(function (req, res) {
-
-        let category = req.params.category;
+        let category = req.query.category;
         console.log('CATEGORY successful ->' + category);
-
         drink.find({category:category},function (err, resultado) {
             if (err) {
                 res.status(500).json({ mensaje: 'Failed GET drinks' });
