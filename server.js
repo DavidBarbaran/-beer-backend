@@ -24,4 +24,5 @@ app.use(bodyparser.urlencoded({ extended: false }));
 var router = require('./routes');
 
 app.use('/api', router);
-app.listen(3000);
+const port = process.env.PORT || 3000;
+app.listen(port);
