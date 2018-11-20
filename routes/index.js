@@ -9,19 +9,19 @@ var category = mongoose.model('category');
 
 router.route('/user').get(function (req, res) {
 
-        // User.findOne({ nameFirst: 'John' });     // returns first user named John
-        //  res.send('user' + id);    
-        
-        user.find(function (err, resultado) {
-            if (err) {
-                res.status(500).json({ mensaje: 'Failed GET users' });
-            }
-            else {
-                res.status(200).json(resultado);
-            }
-        });
+    // User.findOne({ nameFirst: 'John' });     // returns first user named John
+    //  res.send('user' + id);    
+
+    user.find(function (err, resultado) {
+        if (err) {
+            res.status(500).json({ mensaje: 'Failed GET users' });
         }
-        )
+        else {
+            res.status(200).json(resultado);
+        }
+    });
+}
+)
     .post(function (req, res) {
         var myUser = new user();
         myUser.name = req.body.name;
@@ -45,20 +45,49 @@ router.route('/user').get(function (req, res) {
 
     });
 
-    router.route('/drink')
+router.route('/login').post(function (req, res) {
+    let email = req.query.email;
+    let password = req.query.password
+    user.findOne({ email: email, password: password }, function (err, resultado) {
+        console.log('RESPONSE successful ->' + resultado);
+        if (err) {
+            res.status(500).json({ mensaje: 'Error del servidor' });
+        }
+        else {
+            if (resultado != null) {
+                res.status(200).json(resultado);
+            } else {
+                res.status(401).json({ mensaje: 'Login failed' });
+            }
+        }
+    });
+});
+
+router.route('/drink')
     .get(function (req, res) {
         let category = req.query.category;
         console.log('CATEGORY successful ->' + category);
-        drink.find({category:category},function (err, resultado) {
-            if (err) {
-                res.status(500).json({ mensaje: 'Failed GET drinks' });
-            }
-            else {
-                res.status(200).json(resultado);
-            }
-        });
-    })
-    .post(function (req, res) {
+        if (category != null) {
+            drink.find({ category: category }, function (err, resultado) {
+                if (err) {
+                    res.status(500).json({ mensaje: 'Failed GET drinks' });
+                }
+                else {
+                    res.status(200).json(resultado);
+                }
+            });
+        } else {
+            drink.find(function (err, resultado) {
+                if (err) {
+                    res.status(500).json({ mensaje: 'Failed GET drinks' });
+                }
+                else {
+                    res.status(200).json(resultado);
+                }
+            });
+        }
+
+    }).post(function (req, res) {
         var myDrink = new drink();
         myDrink.category = req.body.category;
         myDrink.description = req.body.description;
@@ -81,8 +110,8 @@ router.route('/user').get(function (req, res) {
 
     });
 
-    router.route('/category')
-    .get(function (req, res) {   
+router.route('/category')
+    .get(function (req, res) {
         category.find(function (err, resultado) {
             if (err) {
                 res.status(500).json({ mensaje: 'Failed GET category' });
@@ -91,7 +120,7 @@ router.route('/user').get(function (req, res) {
                 res.status(200).json(resultado);
             }
         });
-        
+
     });
-    
+
 module.exports = router;
