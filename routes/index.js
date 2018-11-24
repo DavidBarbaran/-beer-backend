@@ -160,6 +160,24 @@ router.route('/category')
 
     });
 
+    async function getDetail(idPurchase, idUser){
+        var newPurchase = {}
+        await detailPurchase.find({ idPurchase: idPurchase}).populate('item')
+        .exec(async (err, res) => {
+            if(err){
+                console.log("error_get_purchase: " + err);
+            } else {
+                 newPurchase = {
+                     '_id' : idPurchase,
+                    'userId' : idUser,
+                    'detailPurchase' : res
+                  }
+                  console.log(res);
+            }
+        });
+        return newPurchase;
+    }
+
     async function getDataPurchase(res){
         var resultado = res
         var o = []
@@ -170,6 +188,25 @@ router.route('/category')
             var idUser =  resultado[key].userId;
             newPurchase = {}
             var key = ""
+
+            /*
+            const dp  = await detailPurchase.find({ idPurchase: idPurchase}).populate('item')
+            .exec(async (err, res) => {
+                if(err){
+                    console.log("error_get_purchase: " + err);
+                } else {
+                     newPurchase = {
+                         '_id' : idPurchase,
+                        'userId' : idUser,
+                        'detailPurchase' : res
+                      }
+                      console.log(res);
+                }
+            });
+
+            */
+
+            /*
             await detailPurchase.find({ idPurchase: idPurchase}, function(err, res){
                 if(err){
                     console.log("error_get_purchase: " + err);
@@ -182,7 +219,9 @@ router.route('/category')
                       console.log(newPurchase);
                 }
             }); 
-            o.push(newPurchase);
+            */
+           var purchase = await getDetail(idPurchase, idUser);
+            o.push(purchase);
         }
         console.log("FINAL: " + o[0].userId);
 
