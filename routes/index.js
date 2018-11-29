@@ -109,43 +109,43 @@ router.route('/drink')
 
     });
 
-    router.route('/drink/:id').put(function (req, res){
-        drink.findById(req.params.id, function(err, model) {
+router.route('/drink/:id').put(function (req, res) {
+    drink.findById(req.params.id, function (err, model) {
 
-            if (err){
-                res.send(err);
-            }
+        if (err) {
+            res.send(err);
+        }
 
-            console.log('UPDATE->' + req.body.offer);
-            
-            model.category = Util.validate(req.body.category, model.category);  // update the bears info
-            model.description = Util.validate(req.body.description, model.description);
-            model.image = Util.validate(req.body.image, model.image);
-            model.isOffer = Util.validate(req.body.isOffer, model.isOffer);
-            model.name = Util.validate(req.body.name, model.name);
-            model.offer = Util.validate(req.body.offer, model.offer);
-            model.price = Util.validate(req.body.price, model.price);
+        console.log('UPDATE->' + req.body.offer);
 
-            // save the bear
-            model.save(function(err) {
-                if (err)
-                    res.send(err);
+        model.category = Util.validate(req.body.category, model.category);  // update the bears info
+        model.description = Util.validate(req.body.description, model.description);
+        model.image = Util.validate(req.body.image, model.image);
+        model.isOffer = Util.validate(req.body.isOffer, model.isOffer);
+        model.name = Util.validate(req.body.name, model.name);
+        model.offer = Util.validate(req.body.offer, model.offer);
+        model.price = Util.validate(req.body.price, model.price);
 
-                res.json({ message: 'Beer updated!' });
-            });
-
-        });
-    }).delete(function(req, res) {
-        drink.remove({
-            _id: req.params.id
-        }, function(err, bear) {
-            
+        // save the bear
+        model.save(function (err) {
             if (err)
                 res.send(err);
 
-            res.json({ message: 'Successfully deleted' });
+            res.json({ message: 'Beer updated!' });
         });
-    });;
+
+    });
+}).delete(function (req, res) {
+    drink.remove({
+        _id: req.params.id
+    }, function (err, bear) {
+
+        if (err)
+            res.send(err);
+
+        res.json({ message: 'Successfully deleted' });
+    });
+});;
 
 router.route('/category')
     .get(function (req, res) {
@@ -160,9 +160,28 @@ router.route('/category')
 
     });
 
-    async function getDetail(idPurchase, idUser){
-        var newPurchase = {}
-        await detailPurchase.find({ idPurchase: idPurchase}).populate('item')
+async function getDetail(idPurchase, idUser) {
+    const result = await detailPurchase.find({ idPurchase: idPurchase }).populate('item').exec();
+    return {
+        '_id': idPurchase,
+        'userId': idUser,
+        'detailPurchase': result
+    }
+}
+
+async function getDataPurchase(res) {
+    var resultado = res
+    var o = []
+    var newPurchase = {}
+    for (var key in resultado) {
+        console.log("FOR_IN: " + resultado[key]._id);
+        var idPurchase = resultado[key]._id;
+        var idUser = resultado[key].userId;
+        newPurchase = {}
+        var key = ""
+
+        /*
+        const dp  = await detailPurchase.find({ idPurchase: idPurchase}).populate('item')
         .exec(async (err, res) => {
             if(err){
                 console.log("error_get_purchase: " + err);
@@ -175,58 +194,31 @@ router.route('/category')
                   console.log(res);
             }
         });
-        return newPurchase;
+
+        */
+
+        /*
+        await detailPurchase.find({ idPurchase: idPurchase}, function(err, res){
+            if(err){
+                console.log("error_get_purchase: " + err);
+            } else {
+                 newPurchase = {
+                     '_id' : idPurchase,
+                    'userId' : idUser,
+                    'detailPurchase' : res
+                  }
+                  console.log(newPurchase);
+            }
+        }); */
+
+        var purchase = await getDetail(idPurchase, idUser);
+        o.push(purchase);
+        // o.push(newPurchase);
     }
+    console.log("FINAL: " + o[0].userId);
 
-    async function getDataPurchase(res){
-        var resultado = res
-        var o = []
-        var newPurchase = {}
-        for(var key in resultado){
-            console.log("FOR_IN: " + resultado[key]._id);
-            var idPurchase = resultado[key]._id;
-            var idUser =  resultado[key].userId;
-            newPurchase = {}
-            var key = ""
-
-            /*
-            const dp  = await detailPurchase.find({ idPurchase: idPurchase}).populate('item')
-            .exec(async (err, res) => {
-                if(err){
-                    console.log("error_get_purchase: " + err);
-                } else {
-                     newPurchase = {
-                         '_id' : idPurchase,
-                        'userId' : idUser,
-                        'detailPurchase' : res
-                      }
-                      console.log(res);
-                }
-            });
-
-            */
-
-            /*
-            await detailPurchase.find({ idPurchase: idPurchase}, function(err, res){
-                if(err){
-                    console.log("error_get_purchase: " + err);
-                } else {
-                     newPurchase = {
-                         '_id' : idPurchase,
-                        'userId' : idUser,
-                        'detailPurchase' : res
-                      }
-                      console.log(newPurchase);
-                }
-            }); 
-            */
-           var purchase = await getDetail(idPurchase, idUser);
-            o.push(purchase);
-        }
-        console.log("FINAL: " + o[0].userId);
-
-        return o;
-    }
+    return o;
+}
 
 router.route('/purchase').get(function (req, response) {
     purchase.find(async function (err, resultado) {
@@ -247,26 +239,26 @@ router.route('/purchase').get(function (req, response) {
                 .json({ mensaje: 'Register purchase failed' })
         }
         else {
-            console.log("DATA_DETAIL",req.body.detailPurchase);
-            for( var key in req.body.detailPurchase){
+            console.log("DATA_DETAIL", req.body.detailPurchase);
+            for (var key in req.body.detailPurchase) {
                 console.log("RUN: ", key);
-                    var myDetailPurchase = new detailPurchase();
-                    myDetailPurchase.idPurchase = resultado._id;
-                    myDetailPurchase.cantidad = req.body.detailPurchase[key].cantidad;
-                    myDetailPurchase.item = req.body.detailPurchase[key].item;
-                    
-                    myDetailPurchase.save(function (err, resultado){
-                        if (err) {
-                           console.log("ERR " + err);
-                        } else {
-                            console.log("REGISTER " + resultado);
-                        }
-                    });
-                
-                    
-          }
+                var myDetailPurchase = new detailPurchase();
+                myDetailPurchase.idPurchase = resultado._id;
+                myDetailPurchase.cantidad = req.body.detailPurchase[key].cantidad;
+                myDetailPurchase.item = req.body.detailPurchase[key].item;
+
+                myDetailPurchase.save(function (err, resultado) {
+                    if (err) {
+                        console.log("ERR " + err);
+                    } else {
+                        console.log("REGISTER " + resultado);
+                    }
+                });
+
+
+            }
             res.status(200)
-                .json({ mensaje: 'Register purchase successful: '  + resultado});
+                .json({ mensaje: 'Register purchase successful: ' + resultado });
         }
     });
 
