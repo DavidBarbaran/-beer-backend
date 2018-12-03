@@ -10,13 +10,9 @@ var detailPurchase = mongoose.model('detailPurchase');
 var purchase = mongoose.model('purchase');
 
 router.route('/user').get(function (req, res) {
-
-    // User.findOne({ nameFirst: 'John' });     // returns first user named John
-    //  res.send('user' + id);    
-
     user.find(function (err, resultado) {
         if (err) {
-            res.status(500).json({ mensaje: 'Failed GET users' });
+            res.status(500).json({ mensaje: 'Error al obtener usuarios' });
         }
         else {
             res.status(200).json(resultado);
@@ -35,11 +31,11 @@ router.route('/user').get(function (req, res) {
     myUser.save(function (err, resultado) {
         if (err) {
             res.status(500)
-                .json({ mensaje: 'Register user failed' })
+                .json({ mensaje: 'El usuario no se registro' })
         }
         else {
             res.status(200)
-                .json({ mensaje: 'Register user successful' });
+                .json({ mensaje: 'Usuario registrdo correctamente' });
         }
     });
 
@@ -49,7 +45,6 @@ router.route('/login').post(function (req, res) {
     let email = req.query.email;
     let password = req.query.password
     user.findOne({ email: email, password: password }, function (err, resultado) {
-        console.log('RESPONSE successful ->' + resultado);
         if (err) {
             res.status(500).json({ mensaje: 'Error del servidor' });
         }
@@ -57,7 +52,7 @@ router.route('/login').post(function (req, res) {
             if (resultado != null) {
                 res.status(200).json(resultado);
             } else {
-                res.status(401).json({ mensaje: 'Login failed' });
+                res.status(401).json({ mensaje: 'Login incorrecto' });
             }
         }
     });
@@ -70,7 +65,7 @@ router.route('/drink')
         if (category != null) {
             drink.find({ category: category }, function (err, resultado) {
                 if (err) {
-                    res.status(500).json({ mensaje: 'Failed GET drinks' });
+                    res.status(500).json({ mensaje: 'Error al obtener bebidas' });
                 }
                 else {
                     res.status(200).json(resultado);
@@ -79,7 +74,7 @@ router.route('/drink')
         } else {
             drink.find(function (err, resultado) {
                 if (err) {
-                    res.status(500).json({ mensaje: 'Failed GET drinks' });
+                    res.status(500).json({ mensaje: 'Error al obtener bebidas' });
                 }
                 else {
                     res.status(200).json(resultado);
@@ -99,11 +94,11 @@ router.route('/drink')
         myDrink.save(function (err, resultado) {
             if (err) {
                 res.status(500)
-                    .json({ mensaje: 'Register drink failed' })
+                    .json({ mensaje: 'Error al registrar la bebida' })
             }
             else {
                 res.status(200)
-                    .json({ mensaje: 'Register drink successful' });
+                    .json({ mensaje: 'Bebida registrada correctamente' });
             }
         });
 
@@ -143,7 +138,7 @@ router.route('/drink/:id').put(function (req, res) {
         if (err)
             res.send(err);
 
-        res.json({ message: 'Successfully deleted' });
+        res.json({ message: 'Bebida borrada correctamente' });
     });
 });;
 
@@ -151,10 +146,26 @@ router.route('/category')
     .get(function (req, res) {
         category.find(function (err, resultado) {
             if (err) {
-                res.status(500).json({ mensaje: 'Failed GET category' });
+                res.status(500).json({ mensaje: 'Error al obtener las categorias' });
             }
             else {
                 res.status(200).json(resultado);
+            }
+        });
+
+    }).post(function (req, res) {
+        var myCategory = new category();
+        myCategory.name = req.body.name;
+        myCategory.value = req.body.value;
+
+        myCategory.save(function (err, resultado) {
+            if (err) {
+                res.status(500)
+                    .json({ mensaje: 'Error al registrar la categoria' })
+            }
+            else {
+                res.status(200)
+                    .json({ mensaje: 'Categoria registrada correctamente' });
             }
         });
 
@@ -172,65 +183,32 @@ async function getDetail(idPurchase, idUser) {
 async function getDataPurchase(res) {
     var resultado = res
     var o = []
-    var newPurchase = {}
     for (var key in resultado) {
         console.log("FOR_IN: " + resultado[key]._id);
         var idPurchase = resultado[key]._id;
         var idUser = resultado[key].userId;
-        newPurchase = {}
         var key = ""
-
-        /*
-        const dp  = await detailPurchase.find({ idPurchase: idPurchase}).populate('item')
-        .exec(async (err, res) => {
-            if(err){
-                console.log("error_get_purchase: " + err);
-            } else {
-                 newPurchase = {
-                     '_id' : idPurchase,
-                    'userId' : idUser,
-                    'detailPurchase' : res
-                  }
-                  console.log(res);
-            }
-        });
-
-        */
-
-        /*
-        await detailPurchase.find({ idPurchase: idPurchase}, function(err, res){
-            if(err){
-                console.log("error_get_purchase: " + err);
-            } else {
-                 newPurchase = {
-                     '_id' : idPurchase,
-                    'userId' : idUser,
-                    'detailPurchase' : res
-                  }
-                  console.log(newPurchase);
-            }
-        }); */
-
         var purchase = await getDetail(idPurchase, idUser);
         o.push(purchase);
-        // o.push(newPurchase);
     }
     console.log("FINAL: " + o[0].userId);
-
     return o;
 }
 
-router.route('/purchase').get(function (req, response) {
-    purchase.find(async function (err, resultado) {
+router.route('/purchase/:id').get(function (req, response) {
+    let userId = req.params.id;
+    purchase.find({userId:userId},async function (err, resultado) {
         if (err) {
-            response.status(500).json({ mensaje: 'Failed GET purchase' });
+            response.status(500).json({ mensaje: 'Error al obtener las compras' });
         }
         else {
             var o = await getDataPurchase(resultado);
             response.status(200).json(o);
         }
     });
-}).post(function (req, res) {
+});
+
+router.route('/purchase').post(function (req, res) {
     var myPurchase = new purchase();
     myPurchase.userId = req.body.userId;
     myPurchase.save(function (err, resultado) {
@@ -258,7 +236,7 @@ router.route('/purchase').get(function (req, response) {
 
             }
             res.status(200)
-                .json({ mensaje: 'Register purchase successful: ' + resultado });
+                .json({ mensaje: 'Compra efectuada correctamente: ' + resultado });
         }
     });
 
